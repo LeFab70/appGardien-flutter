@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
 
 // Un FloatingActionButton (FAB) personnalisé et réutilisable
 class FloatingButtons extends StatelessWidget {
@@ -14,9 +15,9 @@ class FloatingButtons extends StatelessWidget {
       // L'action déclenchée au clic (ici, l'ouverture du BottomSheet)
       onPressed: onPressed,
       // Texte d'accessibilité affiché lors d'un appui long
-      tooltip: 'Add new data',
+      tooltip: 'Add new match',
       // Icône centrale du bouton
-      child: const Icon(Icons.add_circle_outlined),
+      child: const Icon(Ionicons.football_outline),
 
     );
   }

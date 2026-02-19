@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:test1_appgardienbut_fabrice/views/ui/login.page.dart';
+import '../controllers/login.provider.dart';
 import '../views/ui/main.screen.dart';
 import '../views/shared/colors/colors.app.dart';
 
@@ -13,7 +16,7 @@ class AppGardienbutEntry extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.scaffoldColor,
         floatingActionButtonTheme: FloatingActionButtonThemeData(
           backgroundColor: AppColors.buttonBackground,
-          iconSize: 35,
+          iconSize: 40,
           elevation: 4,
           foregroundColor: AppColors.buttonTextColor,
           shape: RoundedRectangleBorder(
@@ -24,9 +27,25 @@ class AppGardienbutEntry extends StatelessWidget {
           shape: const CircularNotchedRectangle(),
           color: AppColors.bottomNavColors,
         ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.buttonTextColor,
+          //centerTitle: true,
+          actionsPadding: EdgeInsets.symmetric(horizontal: 6),
+
+        )
       ),
 
-      home: MainScreen(),
+      // On vérifie si l'utilisateur est connecté
+     home:Consumer<LoginProvider>(
+        builder: (context, loginProvider, child) {
+          if (loginProvider.isLoggedIn) {
+            return MainScreen(); //afficher le mainscreen si connecté
+          } else {
+            return const LoginPage(); //  page de login
+          }
+        },
+      ),
     );
   }
 }

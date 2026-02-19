@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
+import 'package:provider/provider.dart';
+import '../../../controllers/login.provider.dart';
+import '../colors/colors.app.dart';
+import '../styles/app.style.dart';
 
 class AppBars extends StatelessWidget implements PreferredSize {
   final VoidCallback onPressed;
@@ -9,20 +14,27 @@ class AppBars extends StatelessWidget implements PreferredSize {
   Widget build(BuildContext context) {
     return AppBar(
       toolbarHeight: 100.00,
-      leading: IconButton(
-        onPressed: () {},
-        icon: Icon(Icons.shopping_bag_rounded),
-      ),
-      title: Text("Stats de Gardien de buts"),
-      actions: [IconButton(onPressed: onPressed, icon: Icon(Icons.add_circle))],
+      title: Text("⚽ Stats de Gardien",style: appStyle(25, AppColors.buttonTextColor, .bold)),
+      actions: [
+        IconButton(
+          onPressed: onPressed,
+          icon: Icon(Ionicons.stats_chart, size: 20),
+        ),
+        IconButton(
+          onPressed: () {
+            // Déclenche la déconnexion
+            Provider.of<LoginProvider>(context, listen: false).logout();
+          },
+          icon: Icon(Ionicons.exit_outline, size: 20),
+        ),
+      ],
     );
   }
 
   @override
-  // TODO: implement preferredSize
-  Size get preferredSize => const Size.fromHeight(100.00); //kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(100.00);
 
   @override
-  // TODO: implement child
+  
   Widget get child => throw UnimplementedError();
 }

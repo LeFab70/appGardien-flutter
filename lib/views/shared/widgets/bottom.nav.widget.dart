@@ -48,19 +48,19 @@ class BottomNavWidget extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: SizedBox( // Use padding instead of fixed SizedBox height/width
+        child: SizedBox(
           width: 60,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: .center,
             children: [
-              Icon(icon, color: isActive ? activeColor : color, size: 22), // Slightly smaller icon
-              const SizedBox(height: 2),
+              Icon(icon, color: isActive ? activeColor : color, size: 22),
+              const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
                   color: isActive ? activeColor : color,
-                  fontSize: 10, // Slightly smaller font
+                  fontSize: 10,
                 ),
               ),
             ],

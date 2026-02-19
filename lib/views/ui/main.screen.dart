@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:test1_appgardienbut_fabrice/views/ui/equipe.page.dart';
+import 'package:test1_appgardienbut_fabrice/views/ui/gardien.page.dart';
+import 'package:test1_appgardienbut_fabrice/views/ui/stat.page.dart';
 import '../shared/widgets/app.bar.dart';
 import '../shared/widgets/floating.buttons.dart';
 
@@ -12,25 +15,20 @@ class MainScreen extends StatelessWidget {
 
   //Liste des pages à utiliser dans le bottomnavigationBar
   final List<Widget> pageList = [
-    // HomePage(),
-    // SearchPage(),
-    // HomePage(),
-    // CartPage(),
-    ProfilePage(),
-    ProfilePage(),
-    ProfilePage(),
-    ProfilePage(),
+    StatPage(),
+    EquipePage(),
+    GardienPage(),
     ProfilePage(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    int pageIndex = 0;
+    //int pageIndex = 0;
     //Utilisation du provider pour fournir les pages de la bottomnavigation bar
     return Consumer<MainScreenNotifier>(
       builder: (context, mainScreenNotifier, child) {
         return Scaffold(
-          appBar: AppBars(onPressed: (){},),
+          appBar: AppBars(onPressed: () {}),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerDocked,
           body: pageList[mainScreenNotifier.pageIndex],
