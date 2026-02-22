@@ -100,4 +100,35 @@ class TeamsProvider extends ChangeNotifier {
     }
   }
 
+
+  // Récupère les stats cumulées d'un gardien
+  Map<String, dynamic> getGoalkeeperTotalStats(String gkId) {
+    int totalShots = 0;
+    int totalGoals = 0;
+    int matchesPlayed = 0;
+    for (var game in _games.where((g) => g.isFinished)) {
+      // Vérifie si le gardien était à domicile ou visiteur
+      if (game.homeGkStats.goalkeeperId == gkId) {
+        totalShots += game.homeGkStats.shotsAgainst;
+        totalGoals += game.homeGkStats.goalsAgainst;
+        matchesPlayed++;
+      } else if (game.visitorGkStats.goalkeeperId == gkId) {
+        totalShots += game.visitorGkStats.shotsAgainst;
+        totalGoals += game.visitorGkStats.goalsAgainst;
+        matchesPlayed++;
+      }
+    }
+    // Calcul du % d'arrêts global
+    double avgSavePct = totalShots == 0
+        ? 0.0
+        : double.parse((((totalShots - totalGoals) / totalShots) * 100).toStringAsFixed(2));
+
+    return {
+      'shots': totalShots,
+      'goals': totalGoals,
+      'matches': matchesPlayed,
+      'pct': avgSavePct,
+    };
+  }
+
 }

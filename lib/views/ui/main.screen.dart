@@ -18,7 +18,7 @@ import 'profile.page.dart';
 class MainScreen extends StatelessWidget {
   MainScreen({super.key});
 
-  //Liste des pages à utiliser dans le bottomnavigationBar
+  // Pages de la navigation
   final List<Widget> pageList = [
     StatPage(),
     EquipePage(),
@@ -26,25 +26,21 @@ class MainScreen extends StatelessWidget {
     ProfilePage(),
   ];
 
-
-  // Ajout d'un match // fonction passée au floating button
+  // Modale pour programmer un match
   void _showScheduleGameModal(BuildContext context) {
     final provider = Provider.of<TeamsProvider>(context, listen: false);
     final _gameFormKey = GlobalKey<FormState>();
 
     String? hTeamId, vTeamId;
     String _location = "Stade Municipal";
-
-    // Variables pour la date et l'heure
     DateTime selectedDate = DateTime.now();
     TimeOfDay selectedTime = TimeOfDay.now();
 
-    //Ajout d'une match/programmé
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder( // Nécessaire pour mettre à jour l'affichage de la date/heure dans la modale
+      builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -66,26 +62,26 @@ class MainScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
 
-                  // Lieu du match
+                  // Champ Lieu
                   TextFormField(
                     initialValue: _location,
                     decoration: const InputDecoration(
-                      labelText: "Lieu du match",
+                      labelText: "Lieu",
                       prefixIcon: Icon(Icons.location_on),
                     ),
-                    validator: (val) => val == null || val.isEmpty ? "Lieu requis" : null,
+                    validator: (val) =>
+                        val == null || val.isEmpty ? "Requis" : null,
                     onSaved: (val) => _location = val!,
                   ),
 
-                  const SizedBox(height: 10),
-
-                  // SELECTION DATE ET HEURE
+                  // Sélecteurs Date et Heure
                   Row(
                     children: [
                       Expanded(
                         child: ListTile(
-                          title: Text("${selectedDate.day}/${selectedDate.month}/${selectedDate.year}"),
-                          subtitle: const Text("Date"),
+                          title: Text(
+                            "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
+                          ),
                           leading: const Icon(Icons.calendar_today),
                           onTap: () async {
                             DateTime? picked = await showDatePicker(
@@ -94,53 +90,66 @@ class MainScreen extends StatelessWidget {
                               firstDate: DateTime.now(),
                               lastDate: DateTime(2100),
                             );
-                            if (picked != null) setModalState(() => selectedDate = picked);
+                            if (picked != null)
+                              setModalState(() => selectedDate = picked);
                           },
                         ),
                       ),
                       Expanded(
                         child: ListTile(
                           title: Text(selectedTime.format(context)),
-                          subtitle: const Text("Heure"),
                           leading: const Icon(Icons.access_time),
                           onTap: () async {
                             TimeOfDay? picked = await showTimePicker(
                               context: context,
                               initialTime: selectedTime,
                             );
-                            if (picked != null) setModalState(() => selectedTime = picked);
+                            if (picked != null)
+                              setModalState(() => selectedTime = picked);
                           },
                         ),
                       ),
                     ],
                   ),
 
-                  // Dropdown Domicile
+                  // Équipe Domicile
                   DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(labelText: "Équipe Domicile"),
-                    value: hTeamId,
+                    decoration: const InputDecoration(
+                      labelText: "Équipe Domicile",
+                    ),
                     items: provider.teams
-                        .map((t) => DropdownMenuItem(value: t.id, child: Text(t.name)))
+                        .map(
+                          (t) => DropdownMenuItem(
+                            value: t.id,
+                            child: Text(t.name),
+                          ),
+                        )
                         .toList(),
                     onChanged: (v) => setModalState(() => hTeamId = v),
-                    validator: (v) => v == null ? "Sélectionnez une équipe" : null,
+                    validator: (v) => v == null ? "Requis" : null,
                   ),
 
-                  // Dropdown Visiteur (Filtre l'équipe domicile)
+                  // Équipe Visiteur (exclut l'équipe domicile)
                   DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(labelText: "Équipe Visiteur"),
-                    value: vTeamId,
-                    // LOGIQUE : On retire l'équipe déjà choisie en Home
+                    decoration: const InputDecoration(
+                      labelText: "Équipe Visiteur",
+                    ),
                     items: provider.teams
                         .where((t) => t.id != hTeamId)
-                        .map((t) => DropdownMenuItem(value: t.id, child: Text(t.name)))
+                        .map(
+                          (t) => DropdownMenuItem(
+                            value: t.id,
+                            child: Text(t.name),
+                          ),
+                        )
                         .toList(),
                     onChanged: (v) => setModalState(() => vTeamId = v),
-                    validator: (v) => v == null ? "Sélectionnez une équipe" : null,
+                    validator: (v) => v == null ? "Requis" : null,
                   ),
 
                   const SizedBox(height: 20),
 
+                  // Bouton de validation
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -151,15 +160,19 @@ class MainScreen extends StatelessWidget {
                         if (_gameFormKey.currentState!.validate()) {
                           _gameFormKey.currentState!.save();
 
-                          // Fusion de la date et de l'heure
+                          // Fusion Date + Heure
                           final fullDateTime = DateTime(
-                            selectedDate.year, selectedDate.month, selectedDate.day,
-                            selectedTime.hour, selectedTime.minute,
+                            selectedDate.year,
+                            selectedDate.month,
+                            selectedDate.day,
+                            selectedTime.hour,
+                            selectedTime.minute,
                           );
 
                           final hGk = provider.getGoalkeeperByTeam(hTeamId!);
                           final vGk = provider.getGoalkeeperByTeam(vTeamId!);
 
+                          // Vérifie si les gardiens existent avant création
                           if (hGk != null && vGk != null) {
                             provider.scheduleGame(
                               Game(
@@ -168,22 +181,29 @@ class MainScreen extends StatelessWidget {
                                 homeTeamId: hTeamId!,
                                 visitorTeamId: vTeamId!,
                                 whereIsGame: _location,
-                                homeGkStats: GoalkeeperGameStats(goalkeeperId: hGk.id),
-                                visitorGkStats: GoalkeeperGameStats(goalkeeperId: vGk.id),
+                                homeGkStats: GoalkeeperGameStats(
+                                  goalkeeperId: hGk.id,
+                                ),
+                                visitorGkStats: GoalkeeperGameStats(
+                                  goalkeeperId: vGk.id,
+                                ),
                               ),
                             );
                             Navigator.pop(context);
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text("Chaque équipe doit avoir un gardien !"),
+                                content: Text("Gardiens manquants !"),
                                 backgroundColor: Colors.redAccent,
                               ),
                             );
                           }
                         }
                       },
-                      child: const Text("Créer le match", style: TextStyle(color: Colors.white)),
+                      child: const Text(
+                        "Créer le match",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ],
@@ -197,25 +217,25 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //int pageIndex = 0;
-    //Utilisation du provider pour fournir les pages de la bottomnavigation bar
     return Consumer<MainScreenNotifier>(
       builder: (context, mainScreenNotifier, child) {
         return Scaffold(
           appBar: AppBars(onPressed: () {}),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerDocked,
+          // Corps changeant selon l'index du Provider
           body: pageList[mainScreenNotifier.pageIndex],
-          //Changer les pages suivants le click/onTap
+          // Barre de navigation personnalisée
           bottomNavigationBar: BottomAppBar(
             notchMargin: 6.0,
             shape: const CircularNotchedRectangle(),
-            clipBehavior: Clip.antiAlias, // Ensures the notch looks smooth
+            clipBehavior: Clip.antiAlias,
             child: SafeAreaWidget(
               currentIndex: mainScreenNotifier.pageIndex,
               changedIndex: (index) => mainScreenNotifier.pageIndex = index,
             ),
           ),
+          // Bouton central pour ajouter un match
           floatingActionButton: FloatingButtons(
             onPressed: () => _showScheduleGameModal(context),
           ),

@@ -4,7 +4,7 @@ import 'package:test1_appgardienbut_fabrice/views/shared/styles/app.style.dart';
 
 import '../../controllers/teams.provider.dart';
 import '../../models/game.dart';
-import '../../models/teams.dart';
+import '../shared/colors/colors.app.dart';
 
 class StatPage extends StatefulWidget {
   const StatPage({super.key});
@@ -14,158 +14,88 @@ class StatPage extends StatefulWidget {
 }
 
 class _StatPageState extends State<StatPage> {
-  void _showInputStatsModal(BuildContext context, Game game) {
+  // Affiche la modale de saisie des scores
+  void _showInputStatsModal(BuildContext context, Game game, String homeGk, String visitorGk) {
     final provider = Provider.of<TeamsProvider>(context, listen: false);
-    // Contrôleurs pour récupérer les textes saisis
-    final hShotsController = TextEditingController();
-    final hGoalsController = TextEditingController();
-    final vShotsController = TextEditingController();
-    final vGoalsController = TextEditingController();
+    int hShots = 0, hGoals = 0, vShots = 0, vGoals = 0;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(
-            context,
-          ).viewInsets.bottom, // Pour monter la modale quand le clavier sort
-        ),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-          ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          decoration: const BoxDecoration(color: AppColors.backgroundLight, borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
           padding: const EdgeInsets.all(20),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Saisie des Statistiques",
-                  style: appStyle(20, Colors.black, FontWeight.bold),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Résultats du Match", style: appStyle(20, AppColors.textColor, FontWeight.bold)),
+              const SizedBox(height: 20),
+
+              // Saisie Gardien Domicile
+              _stepperSection("🏠 Home GK: $homeGk", hShots, hGoals,
+                      (val) => setModalState(() => hShots = val),
+                      (val) => setModalState(() => hGoals = val)),
+
+              const Divider(height: 40),
+
+              // Saisie Gardien Visiteur
+              _stepperSection("🚩 Visiteur GK: $visitorGk", vShots, vGoals,
+                      (val) => setModalState(() => vShots = val),
+                      (val) => setModalState(() => vGoals = val)),
+
+              const SizedBox(height: 30),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, padding: const EdgeInsets.all(15)),
+                  onPressed: () {
+                    // Enregistre et ferme
+                    provider.updateMatchResults(
+                      gameId: game.id,
+                      homeShots: hShots, homeGoals: hGoals,
+                      visitorShots: vShots, visitorGoals: vGoals,
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: const Text("VALIDER LES STATS", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
-                const SizedBox(height: 20),
-
-                // ÉQUIPE DOMICILE
-                _buildGkInputSection(
-                  context,
-                  title: "Gardien Domicile",
-                  shotsCtrl: hShotsController,
-                  goalsCtrl: hGoalsController,
-                ),
-
-                const Divider(height: 40),
-
-                // ÉQUIPE VISITEUR
-                _buildGkInputSection(
-                  context,
-                  title: "Gardien Visiteur",
-                  shotsCtrl: vShotsController,
-                  goalsCtrl: vGoalsController,
-                ),
-                const SizedBox(height: 30),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                    ),
-                    onPressed: () {
-                      // Validation simple
-                      if (hShotsController.text.isEmpty ||
-                          vShotsController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              "Veuillez remplir au moins les lancers contre",
-                            ),
-                          ),
-                        );
-                        return;
-                      }
-
-                      // 1. Conversion des textes en entiers (avec sécurité)
-                      int hShots = int.tryParse(hShotsController.text) ?? 0;
-                      int hGoals = int.tryParse(hGoalsController.text) ?? 0;
-                      int vShots = int.tryParse(vShotsController.text) ?? 0;
-                      int vGoals = int.tryParse(vGoalsController.text) ?? 0;
-                      // Appel au provider pour mettre à jour le match
-                      provider.updateMatchResults(
-                        gameId: game.id,
-                        homeShots: hShots,
-                        homeGoals: hGoals,
-                        visitorShots: vShots,
-                        visitorGoals: vGoals,
-                      );
-
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Statistiques mises à jour !"),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      "Enregistrer le résultat",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // Widget utilitaire pour créer les champs de saisie par gardien
-  Widget _buildGkInputSection(
-    BuildContext context, {
-    required String title,
-    required TextEditingController shotsCtrl,
-    required TextEditingController goalsCtrl,
-  }) {
+  // Section regroupant Lancers et Buts
+  Widget _stepperSection(String title, int shots, int goals, Function(int) onShots, Function(int) onGoals) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.blueGrey,
-          ),
-        ),
+        Text(title, style: appStyle(15, AppColors.primary, FontWeight.bold)),
         const SizedBox(height: 10),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Expanded(
-              child: TextField(
-                controller: shotsCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: "Lancers contre",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: TextField(
-                controller: goalsCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: "Buts encaissés",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
+            _counterField("Lancers", shots, onShots),
+            _counterField("Buts", goals, onGoals),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Boutons + / - personnalisés
+  Widget _counterField(String label, int value, Function(int) onChange) {
+    return Column(
+      children: [
+        Text(label, style: appStyle(12, AppColors.secondary, FontWeight.w500)),
+        Row(
+          children: [
+            IconButton(onPressed: () => value > 0 ? onChange(value - 1) : null, icon: const Icon(Icons.remove_circle, color: Colors.redAccent)),
+            Text("$value", style: appStyle(20, AppColors.textColor, FontWeight.bold)),
+            IconButton(onPressed: () => onChange(value + 1), icon: const Icon(Icons.add_circle, color: Colors.green)),
           ],
         ),
       ],
@@ -174,68 +104,117 @@ class _StatPageState extends State<StatPage> {
 
   @override
   Widget build(BuildContext context) {
-    // On écoute les changements dans TeamsProvider
     return Consumer<TeamsProvider>(
       builder: (context, provider, child) {
-        return Scaffold(
-          body: provider.games.isEmpty
-              ? const Center(child: Text("Aucun match programmé"))
-              : ListView.builder(
-                  itemCount: provider.games.length,
-                  itemBuilder: (context, index) {
-                    final game = provider.games[index];
-                    final homeTeam = provider.teams.firstWhere(
-                      (t) => t.id == game.homeTeamId,
-                    );
-                    final visitorTeam = provider.teams.firstWhere(
-                      (t) => t.id == game.visitorTeamId,
-                    );
+        return Column(
+          children: [
+            // En-tête de la page
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text('Mes Matchs', style: appStyle(30, AppColors.textColor, FontWeight.bold)),
+                ],
+              ),
+            ),
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+            // Liste des matchs
+            Expanded(
+              child: provider.games.isEmpty
+                  ? Center(child: Text("Aucun match programmé", style: appStyle(18, AppColors.secondary, FontWeight.w400)))
+                  : ListView.builder(
+                itemCount: provider.games.length,
+                itemBuilder: (context, index) {
+                  final game = provider.games[index];
+                  final homeTeam = provider.teams.firstWhere((t) => t.id == game.homeTeamId);
+                  final visitorTeam = provider.teams.firstWhere((t) => t.id == game.visitorTeamId);
+                  final homeGk = provider.goalkeepers.firstWhere((g) => g.id == game.homeGkStats.goalkeeperId);
+                  final visitorGk = provider.goalkeepers.firstWhere((g) => g.id == game.visitorGkStats.goalkeeperId);
+
+                  return Card(
+                    color: AppColors.backgroundLight,
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: ExpansionTile(
+                      leading: _buildVsLogos(homeTeam.urlLogo, visitorTeam.urlLogo),
+                      iconColor: AppColors.primary,
+                      collapsedIconColor: AppColors.secondary,
+                      title: Text("${homeTeam.name} vs ${visitorTeam.name}", style: appStyle(15, AppColors.primary, FontWeight.bold)),
+                      subtitle: Text(
+                        "${game.date.day}/${game.date.month} à ${game.date.hour}h${game.date.minute.toString().padLeft(2, '0')}",
+                        style: appStyle(13, AppColors.secondary, FontWeight.w500),
                       ),
-                      child: ExpansionTile(
-                        title: Text("${homeTeam.name} vs ${visitorTeam.name}"),
-                        subtitle: Text(
-                          game.isFinished
-                              ? "✅ Terminé"
-                              : "⏳ En attente de stats",
-                        ),
-                        children: [
-                          if (!game.isFinished)
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: ElevatedButton.icon(
-                                onPressed: () =>
-                                    _showInputStatsModal(context, game),
-                                icon: const Icon(Icons.edit),
-                                label: const Text("Saisir les résultats"),
-                              ),
-                            )
-                          else
-                            _buildStatsSummary(game, homeTeam, visitorTeam),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                      children: [
+                        // Affiche bouton ou résumé selon statut match
+                        if (!game.isFinished)
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                              onPressed: () => _showInputStatsModal(context, game, homeGk.name, visitorGk.name),
+                              icon: const Icon(Icons.edit, color: Colors.white),
+                              label: const Text("Saisir les résultats", style: TextStyle(color: Colors.white)),
+                            ),
+                          )
+                        else
+                          _buildStatsSummary(game, homeGk.name, visitorGk.name),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         );
       },
     );
   }
 
-  // Widget simple pour afficher le résumé après saisie
-  Widget _buildStatsSummary(Game game, Teams h, Teams v) {
+  // Logos superposés (Stack)
+  Widget _buildVsLogos(String urlHome, String urlVisitor) {
+    return SizedBox(
+      width: 60,
+      child: Stack(
+        children: [
+          CircleAvatar(radius: 18, backgroundImage: NetworkImage(urlHome), backgroundColor: Colors.white),
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: CircleAvatar(radius: 18, backgroundImage: NetworkImage(urlVisitor), backgroundColor: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Résumé final des arrêts
+  Widget _buildStatsSummary(Game game, String homeGkName, String visitorGkName) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          Text("${h.name} : ${game.homeGkStats.savePercentage}% d'arrêts"),
-          Text("${v.name} : ${game.visitorGkStats.savePercentage}% d'arrêts"),
+          _gkStatRow(homeGkName, game.homeGkStats.shotsAgainst, game.homeGkStats.goalsAgainst, game.homeGkStats.savePercentage),
+          const Divider(),
+          _gkStatRow(visitorGkName, game.visitorGkStats.shotsAgainst, game.visitorGkStats.goalsAgainst, game.visitorGkStats.savePercentage),
         ],
       ),
+    );
+  }
+
+  // Ligne de stat individuelle
+  Widget _gkStatRow(String name, int shots, int goals, double pct) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(child: Text(name, style: appStyle(14, AppColors.textColor, FontWeight.bold))),
+        Text("$shots Shots / $goals Buts", style: appStyle(13, AppColors.secondary, FontWeight.w500)),
+        const SizedBox(width: 10),
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(8)),
+          child: Text("$pct%", style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+        )
+      ],
     );
   }
 }
