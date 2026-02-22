@@ -1,9 +1,11 @@
 class Game {
   final String id;
-  final DateTime date; // Combine date et heure pour plus de simplicité
+  final DateTime date;
+  final DateTime timeOfGame;
   final String homeTeamId;
   final String visitorTeamId;
-  final String goalkeeperId;
+  final String goalkeeperHomeId;
+  final String whereIsGame;
   int shotsAgainst;
   int goalsAgainst;
 
@@ -12,9 +14,11 @@ class Game {
     required this.date,
     required this.homeTeamId,
     required this.visitorTeamId,
-    required this.goalkeeperId,
+    required this.goalkeeperHomeId,
     this.shotsAgainst = 0,
     this.goalsAgainst = 0,
+    required this.timeOfGame,
+    required this.whereIsGame,
   });
 
   // Calcul du pourcentage d'arrêts (Save Percentage)

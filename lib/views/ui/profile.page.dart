@@ -1,7 +1,6 @@
-import 'package:test1_appgardienbut_fabrice/views/shared/colors/colors.app.dart';
-
-import '../shared/styles/app.style.dart';
 import 'package:flutter/material.dart';
+import 'package:test1_appgardienbut_fabrice/views/shared/colors/colors.app.dart';
+import '../shared/styles/app.style.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -11,42 +10,68 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  // Variable locale temporaire pour le switch (avant d'utiliser un Provider)
+  bool _isDarkMode = false;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Paramètres', style: appStyle(20, Colors.black, FontWeight.bold)),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              child: ListTile(
-                leading: const Icon(Icons.dark_mode_outlined),
-                title: Text('Mode Sombre', style: appStyle(18, Colors.black, FontWeight.w500)),
-                trailing: Switch(
-                  value: false,
-                  onChanged: (value) {},
-                  hoverColor: AppColors.textColor,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Paramètres',
+            style: appStyle(24, AppColors.textColor, FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+
+          // Section Réglages
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            child: ListTile(
+              leading: Icon(
+                _isDarkMode ? Icons.dark_mode : Icons.dark_mode_outlined,
+                color: AppColors.buttonBackground , // Couleur assortie à ton thème
+              ),
+              title: Text(
+                  'Mode Sombre',
+                  style: appStyle(18, AppColors.textColor, FontWeight.w500)
+              ),
+              trailing: Switch(
+                value: _isDarkMode,
+                onChanged: (value) {
+                  setState(() {
+                    _isDarkMode = value;
+                  });
+                  // ThemeProvider plus tard
+                },
+              ),
+            ),
+          ),
+
+          const Spacer(), // Pousse le contenu suivant vers le bas
+
+          // Section Infos / Crédits
+          Center(
+            child: Column(
+              children: [
+                Text(
+                  "Author: Fabrice Kouonang",
+                  style: appStyle(16, AppColors.textColor, FontWeight.w600),
                 ),
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  "Version 1.0.0 • CCNB-2026",
+                  textAlign: TextAlign.center,
+                  style: appStyle(12, Colors.grey, FontWeight.normal),
+                ),
+                const SizedBox(height: 30), // Petit espace de sécurité en bas
+              ],
             ),
-            const SizedBox(height: 60,),
-            Expanded(
-              child: Column(
-                children: [
-                  Text("Author: Fabrice Kouonang",style: appStyle(20, AppColors.textColor, FontWeight.bold)),
-                  Text("Version 1.0.0\nCCNB-2026", style: appStyle(14, Colors.grey, FontWeight.normal)),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
