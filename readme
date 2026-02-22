@@ -1,0 +1,30 @@
+# Application Gestionnaire de Statistiques - Gardien de But
+
+## 📝 Présentation du Projet
+Cette application mobile, développée avec **Flutter**, permet aux entraîneurs de gérer les performances de leurs gardiens de but. Elle suit une architecture modulaire avec un découpage en petits composants (widgets) et l'utilisation de modèles de données pour une meilleure maintenance.
+
+## 🎥 Démonstration Vidéo (Loom)
+Pour voir l'application en action sans l'installer, voici les vidéos de démonstration :
+1. **Partie 1 (Gestion Équipes & Gardiens) :** [Lien Loom](https://www.loom.com/share/b45b8840aef24d4280fdd81111e66ad4)
+2. **Partie 2 (Planification & Matchs) :** [Lien Loom](https://www.loom.com/share/49cdd29cdbbc4c918dd1e2c735704e0d)
+3. **Partie 3 (Statistiques & Profil) :** [Lien Loom](https://www.loom.com/share/859ae9a88ee4406bb88599ca56ed5f6c)
+
+## 🚀 Fonctionnalités principales
+- **Authentification :** Simulation complète de Login et Logout.
+- **Gestion des Équipes :** Création et suppression d'équipes avec logos.
+- **Gestion des Gardiens :** Assignation à une équipe et suppression.
+- **Matchs :** Planification de matchs (Date, Heure, Lieu) avec filtres anti-doublons pour les équipes.
+- **Statistiques :** - Saisie des résultats de fin de match via un système d'incrémenteurs (+/-).
+    - Calcul automatique du pourcentage d'arrêts.
+    - Consultation des statistiques globales (historique) en cliquant sur le nom d'un gardien.
+- **Profil :** - Support du Mode Dark.
+    - Interface prête pour la future mise à jour des données de connexion.
+
+## 🛠 Installation et Dépendances
+Le projet a été nettoyé via la commande `flutter clean` pour réduire la taille de l'archive ZIP (en supprimant les dossiers de compilation volumineux).
+
+**Pour lancer le projet :**
+1. Extraire le dossier ZIP.
+2. Exécuter la commande suivante pour récupérer automatiquement toutes les dépendances listées dans le `pubspec.yaml` :
+   ```bash
+   flutter pub get
